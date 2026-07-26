@@ -1,0 +1,98 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isNotBanned() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isBanned == false;
+    }
+
+    // ---------- Users ----------
+    match /users/{uid} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(uid);
+      // Users can update their own profile but NOT walletBalance, isBanned, or wins/earnings
+      // (those are admin/server-only fields, changed via transactions/Cloud Functions).
+      allow update: if isOwner(uid) &&
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['walletBalance', 'isBanned', 'wins', 'totalEarnings', 'matchesPlayed']);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Admins (managed manually via Firebase Console, not from app) ----------
+    match /admins/{uid} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ---------- Tournaments ----------
+    match /tournaments/{tournamentId} {
+      allow read: if true; // public listing
+      allow create, update, delete: if isAdmin();
+
+      match /registrations/{regId} {
+        allow read: if isAdmin() || isOwner(resource.data.userId);
+        // Anti-duplicate: one registration per user per tournament, enforced by
+        // requiring the registration doc id == userId (client sets this) OR
+        // checked via a Cloud Function trigger for stronger guarantees.
+        allow create: if isSignedIn() && isNotBanned() &&
+          request.resource.data.userId == request.auth.uid;
+        allow update: if isAdmin();
+        allow delete: if isAdmin();
+      }
+    }
+
+    // ---------- Wallet transactions ----------
+    match /wallet_transactions/{txId} {
+      allow read: if isAdmin() || isOwner(resource.data.userId);
+      allow create: if isSignedIn() && isNotBanned() &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.status == 'PENDING';
+      allow update: if isAdmin(); // only admin can approve/reject
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Teams ----------
+    match /teams/{teamId} {
+      allow read: if true;
+      allow create: if isSignedIn() && isNotBanned();
+      allow update: if isAdmin() ||
+        (isSignedIn() && resource.data.captainId == request.auth.uid);
+      allow delete: if isAdmin();
+    }
+
+    // ---------- Leaderboard (admin/Cloud Function writes, public read) ----------
+    match /leaderboard/{period}/entries/{uid} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ---------- Notifications ----------
+    match /notifications/{uid}/items/{notifId} {
+      allow read: if isOwner(uid);
+      allow update: if isOwner(uid) &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+      allow create: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /broadcast_notifications/{notifId} {
+      allow read: if false; // consumed only by Cloud Functions
+      allow create: if isAdmin();
+    }
+  }
+}

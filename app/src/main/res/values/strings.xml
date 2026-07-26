@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">MI ESPORT</string>
+    <string name="default_notification_channel_id">mi_esport_default</string>
+</resources>

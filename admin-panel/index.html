@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MI ESPORT — Admin Panel</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ===================== LOGIN VIEW ===================== -->
+  <div id="loginView" class="auth-screen">
+    <div class="glow glow-green"></div>
+    <div class="glow glow-red"></div>
+    <div class="glass-card login-card">
+      <h1 class="brand-title">MI ESPORT</h1>
+      <p class="brand-sub">Admin Panel</p>
+      <input id="loginEmail" type="email" placeholder="Admin Email" class="input" />
+      <input id="loginPassword" type="password" placeholder="Password" class="input" />
+      <button id="loginBtn" class="btn-primary">Sign In</button>
+      <p id="loginError" class="error-text"></p>
+    </div>
+  </div>
+
+  <!-- ===================== DASHBOARD VIEW ===================== -->
+  <div id="dashboardView" class="dashboard hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand">MI ESPORT</div>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-tab="overview">📊 Overview</button>
+        <button class="nav-item" data-tab="tournaments">🏆 Tournaments</button>
+        <button class="nav-item" data-tab="registrations">📝 Registrations</button>
+        <button class="nav-item" data-tab="wallet">💰 Wallet Requests</button>
+        <button class="nav-item" data-tab="users">👤 Users</button>
+        <button class="nav-item" data-tab="rooms">🔑 Room ID / Live</button>
+        <button class="nav-item" data-tab="notifications">🔔 Notifications</button>
+      </nav>
+      <button id="logoutBtn" class="nav-item logout">🚪 Logout</button>
+    </aside>
+
+    <main class="main-content">
+
+      <!-- OVERVIEW -->
+      <section id="tab-overview" class="tab-section active">
+        <h2>Overview</h2>
+        <div class="stat-grid">
+          <div class="glass-card stat-card"><span id="statTournaments">0</span><label>Tournaments</label></div>
+          <div class="glass-card stat-card"><span id="statUsers">0</span><label>Users</label></div>
+          <div class="glass-card stat-card"><span id="statPendingTx">0</span><label>Pending Requests</label></div>
+          <div class="glass-card stat-card"><span id="statLive">0</span><label>Live Now</label></div>
+        </div>
+      </section>
+
+      <!-- TOURNAMENTS -->
+      <section id="tab-tournaments" class="tab-section">
+        <div class="section-header">
+          <h2>Tournaments</h2>
+          <button id="newTournamentBtn" class="btn-primary small">+ Create Tournament</button>
+        </div>
+        <div id="tournamentsList" class="list-container"></div>
+      </section>
+
+      <!-- CREATE/EDIT TOURNAMENT MODAL -->
+      <div id="tournamentModal" class="modal hidden">
+        <div class="glass-card modal-card">
+          <h3 id="tournamentModalTitle">Create Tournament</h3>
+          <input id="tTitle" class="input" placeholder="Tournament Title" />
+          <input id="tGame" class="input" placeholder="Game (e.g. PUBG Mobile)" />
+          <select id="tMode" class="input">
+            <option value="SOLO">Solo</option>
+            <option value="DUO">Duo</option>
+            <option value="SQUAD" selected>Squad</option>
+          </select>
+          <select id="tType" class="input">
+            <option value="FREE">Free</option>
+            <option value="PAID">Paid</option>
+          </select>
+          <input id="tEntryFee" type="number" class="input" placeholder="Entry Fee (Rs.)" />
+          <input id="tPrizePool" type="number" class="input" placeholder="Prize Pool (Rs.)" />
+          <input id="tTotalSlots" type="number" class="input" placeholder="Total Slots" />
+          <input id="tMatchDateTime" type="datetime-local" class="input" />
+          <textarea id="tRules" class="input" placeholder="Rules"></textarea>
+          <div class="modal-actions">
+            <button id="tournamentSaveBtn" class="btn-primary">Save</button>
+            <button id="tournamentCancelBtn" class="btn-secondary">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGISTRATIONS -->
+      <section id="tab-registrations" class="tab-section">
+        <h2>Registrations</h2>
+        <select id="regTournamentSelect" class="input" style="max-width:320px;"></select>
+        <div id="registrationsList" class="list-container"></div>
+      </section>
+
+      <!-- WALLET REQUESTS -->
+      <section id="tab-wallet" class="tab-section">
+        <h2>Wallet Requests</h2>
+        <div id="walletList" class="list-container"></div>
+      </section>
+
+      <!-- USERS -->
+      <section id="tab-users" class="tab-section">
+        <h2>Manage Users</h2>
+        <input id="userSearch" class="input" placeholder="Search by name or email..." style="max-width:320px;" />
+        <div id="usersList" class="list-container"></div>
+      </section>
+
+      <!-- ROOM ID / LIVE -->
+      <section id="tab-rooms" class="tab-section">
+        <h2>Room ID / Live Control</h2>
+        <select id="roomTournamentSelect" class="input" style="max-width:320px;"></select>
+        <div class="glass-card" style="padding:20px; margin-top:16px;">
+          <input id="roomIdInput" class="input" placeholder="Room ID" />
+          <input id="roomPasswordInput" class="input" placeholder="Room Password" />
+          <button id="publishRoomBtn" class="btn-primary">Publish Room ID</button>
+        </div>
+        <div class="glass-card" style="padding:20px; margin-top:16px;">
+          <h3>Live Status</h3>
+          <input id="youtubeVideoIdInput" class="input" placeholder="YouTube Video ID" />
+          <label class="checkbox-label">
+            <input type="checkbox" id="isLiveCheckbox" /> Mark as Live
+          </label>
+          <button id="updateLiveBtn" class="btn-primary">Update Live Status</button>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS -->
+      <section id="tab-notifications" class="tab-section">
+        <h2>Send Notification</h2>
+        <div class="glass-card" style="padding:20px;">
+          <input id="notifTitle" class="input" placeholder="Title" />
+          <textarea id="notifBody" class="input" placeholder="Message"></textarea>
+          <select id="notifTarget" class="input">
+            <option value="all">All Users (topic broadcast)</option>
+            <option value="single">Single User (by UID)</option>
+          </select>
+          <input id="notifUid" class="input" placeholder="User UID (if single)" />
+          <button id="sendNotifBtn" class="btn-primary">Send Notification</button>
+          <p class="hint-text">Note: actual push delivery requires a Cloud Function / server endpoint with the FCM Admin SDK — this panel writes the notification record to Firestore which your Cloud Function should trigger on.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+<script type="module" src="js/firebase-config.js"></script>
+<script type="module" src="js/auth.js"></script>
+<script type="module" src="js/tournaments.js"></script>
+<script type="module" src="js/registrations.js"></script>
+<script type="module" src="js/wallet.js"></script>
+<script type="module" src="js/users.js"></script>
+<script type="module" src="js/rooms.js"></script>
+<script type="module" src="js/notifications.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

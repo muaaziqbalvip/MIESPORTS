@@ -1,0 +1,269 @@
+:root {
+  --bg: #05080A;
+  --surface: #0D1215;
+  --surface-elevated: #121A1E;
+  --glass: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.14);
+  --green: #34E39A;
+  --green-dark: #1EA36E;
+  --red: #E0304A;
+  --gold: #FFC94A;
+  --text: #F5F7F8;
+  --text-secondary: #A6B0B5;
+  --text-muted: #6B7478;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+.hidden { display: none !important; }
+
+/* ---------- Glass components ---------- */
+.glass-card {
+  background: linear-gradient(180deg, var(--glass), rgba(255,255,255,0.02));
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+}
+
+.glow {
+  position: fixed;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(100px);
+  z-index: 0;
+}
+.glow-green { background: rgba(52,227,154,0.35); top: -80px; left: -80px; }
+.glow-red { background: rgba(224,48,74,0.3); bottom: -80px; right: -80px; }
+
+/* ---------- Auth screen ---------- */
+.auth-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 360px;
+  padding: 40px 32px;
+  text-align: center;
+}
+.brand-title {
+  color: var(--green);
+  font-size: 32px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: 1px;
+}
+.brand-sub {
+  color: var(--text-secondary);
+  margin: 4px 0 24px;
+}
+
+/* ---------- Inputs & buttons ---------- */
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  background: var(--surface-elevated);
+  color: var(--text);
+  font-size: 14px;
+}
+.input:focus { outline: none; border-color: var(--green); }
+textarea.input { min-height: 80px; resize: vertical; }
+
+.btn-primary {
+  width: 100%;
+  padding: 13px;
+  border: none;
+  border-radius: 12px;
+  background: var(--green);
+  color: var(--bg);
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.88; }
+.btn-primary.small { width: auto; padding: 10px 18px; }
+
+.btn-secondary {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-danger {
+  border: 1px solid rgba(224,48,74,0.5);
+  background: transparent;
+  color: var(--red);
+  border-radius: 10px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.error-text { color: var(--red); font-size: 13px; min-height: 18px; }
+.hint-text { color: var(--text-muted); font-size: 12px; margin-top: 8px; }
+
+/* ---------- Dashboard layout ---------- */
+.dashboard {
+  display: flex;
+  min-height: 100vh;
+}
+.sidebar {
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--glass-border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+.sidebar-brand {
+  color: var(--green);
+  font-weight: 900;
+  font-size: 20px;
+  padding: 0 24px 20px;
+  letter-spacing: 1px;
+}
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+.nav-item {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  text-align: left;
+  padding: 12px 24px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.nav-item:hover { background: var(--glass); color: var(--text); }
+.nav-item.active { background: rgba(52,227,154,0.12); color: var(--green); border-right: 3px solid var(--green); }
+.nav-item.logout { color: var(--red); margin: 0 0 0; }
+
+.main-content {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+}
+.tab-section { display: none; }
+.tab-section.active { display: block; }
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+.stat-card {
+  padding: 20px;
+  text-align: center;
+}
+.stat-card span {
+  display: block;
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--green);
+}
+.stat-card label { color: var(--text-muted); font-size: 13px; }
+
+.list-container {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list-row {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.list-row-title { font-weight: 600; }
+.list-row-sub { color: var(--text-muted); font-size: 13px; }
+.list-row-actions { display: flex; gap: 8px; }
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-live { background: rgba(224,48,74,0.15); color: var(--red); }
+.badge-upcoming { background: rgba(52,227,154,0.15); color: var(--green); }
+.badge-pending { background: rgba(255,201,74,0.15); color: var(--gold); }
+.badge-approved { background: rgba(52,227,154,0.15); color: var(--green); }
+.badge-rejected { background: rgba(224,48,74,0.15); color: var(--red); }
+
+/* ---------- Modal ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal-card {
+  width: 420px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 28px;
+}
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+@media (max-width: 800px) {
+  .dashboard { flex-direction: column; }
+  .sidebar { width: 100%; height: auto; flex-direction: row; overflow-x: auto; position: static; }
+  .sidebar-nav { flex-direction: row; }
+  .main-content { padding: 20px; }
+}
