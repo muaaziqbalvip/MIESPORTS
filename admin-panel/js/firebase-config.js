@@ -7,14 +7,16 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-aut
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_API_KEY",
-  authDomain: "REPLACE_WITH_PROJECT.firebaseapp.com",
-  databaseURL: "https://REPLACE_WITH_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "REPLACE_WITH_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_PROJECT.appspot.com",
-  messagingSenderId: "REPLACE_WITH_SENDER_ID",
-  appId: "REPLACE_WITH_APP_ID"
+  apiKey: "AIzaSyCi3Ike6mKfmkeHtqkJQ0RQCdD0nRu1vsw",
+  authDomain: "mi-esports.firebaseapp.com",
+  databaseURL: "https://mi-esports-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "mi-esports",
+  storageBucket: "mi-esports.firebasestorage.app",
+  messagingSenderId: "309861861246",
+  appId: "1:309861861246:web:fdda82f7b71d348d9f952f",
+  measurementId: "G-TW65C9H1W5"
 };
 
 export const app = initializeApp(firebaseConfig);
