@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -22,7 +24,7 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystoreProps = java.util.Properties()
+            val keystoreProps = Properties()
             val keystorePropsFile = rootProject.file("keystore.properties")
             if (keystorePropsFile.exists()) {
                 keystoreProps.load(keystorePropsFile.inputStream())
