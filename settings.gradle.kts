@@ -10,7 +10,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") } // required for android-youtube-player library
     }
 }
 

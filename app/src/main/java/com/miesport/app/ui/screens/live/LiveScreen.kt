@@ -1,5 +1,8 @@
 package com.miesport.app.ui.screens.live
 
+import android.annotation.SuppressLint
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,14 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.miesport.app.ui.components.GlassCard
 import com.miesport.app.ui.components.PulsingDot
 import com.miesport.app.ui.theme.*
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayerView
-import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
 
 @Composable
 fun LiveScreen(
@@ -83,18 +83,41 @@ fun LiveScreen(
     }
 }
 
+/**
+ * Lightweight YouTube embed using WebView + YouTube's iframe embed API.
+ * Avoids any third-party player library and its dependency-resolution issues,
+ * while still supporting autoplay and standard playback controls.
+ */
+@SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun YouTubeEmbed(videoId: String) {
-    val lifecycleOwner = LocalLifecycleOwner.current
     AndroidView(
         factory = { context ->
-            YouTubePlayerView(context).apply {
-                lifecycleOwner.lifecycle.addObserver(this)
-                addYouTubePlayerListener(object : AbstractYouTubePlayerListener() {
-                    override fun onReady(youTubePlayer: com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer) {
-                        youTubePlayer.loadVideo(videoId, 0f)
-                    }
-                })
+            WebView(context).apply {
+                settings.javaScriptEnabled = true
+                settings.mediaPlaybackRequiresUserGesture = false
+                webViewClient = WebViewClient()
+                val embedHtml = """
+                    <html>
+                      <body style="margin:0;padding:0;background:#000;">
+                        <iframe
+                          width="100%"
+                          height="100%"
+                          src="https://www.youtube.com/embed/$videoId?autoplay=1&playsinline=1"
+                          frameborder="0"
+                          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                          allowfullscreen>
+                        </iframe>
+                      </body>
+                    </html>
+                """.trimIndent()
+                loadDataWithBaseURL(
+                    "https://www.youtube.com",
+                    embedHtml,
+                    "text/html",
+                    "UTF-8",
+                    null
+                )
             }
         },
         modifier = Modifier.fillMaxWidth().height(220.dp)

@@ -114,9 +114,6 @@ dependencies {
     // DataStore for local prefs
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    // YouTube player (for Live section)
-    implementation("com.pierfrancescosoffritti.androidyoutubeplayer:core:12.1.2")
-
     // Splash screen API
     implementation("androidx.core:core-splashscreen:1.0.1")
 
