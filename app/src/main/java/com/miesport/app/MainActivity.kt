@@ -14,7 +14,7 @@ class MainActivity : ComponentActivity() {
 
     // TODO: replace with your actual Web Client ID from Firebase Console
     // (Project settings -> General -> Web SDK config, or google-services.json "client_type":3 entry)
-    private val webClientId = "309861861246-hncdeooid5ao4iet4aikeh59er3a62ca.apps.googleusercontent.com"
+    private val webClientId = "REPLACE_WITH_FIREBASE_WEB_CLIENT_ID"
 
     private var onGoogleTokenReceived: ((String?) -> Unit)? = null
 

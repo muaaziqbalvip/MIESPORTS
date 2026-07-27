@@ -2,13 +2,11 @@
 
 Poora setup step-by-step. Sab kuch is order mein karein.
 
-## 0. IMPORTANT — Gradle Wrapper Jar
+## 0. Gradle Wrapper — Ab Automatic Hai
 
-Is zip mein `gradle/wrapper/gradle-wrapper.properties` hai lekin `gradle-wrapper.jar` aur `gradlew`/`gradlew.bat` scripts nahi hain (ye binary/generated files hain jo sandbox mein bina internet ke generate nahi ho sakte).
+Is zip mein `gradlew` script aur `gradle-wrapper.jar` shamil nahi hain (ye generated files hain), **lekin GitHub Actions workflow khud inhe generate kar leta hai** build ke waqt — aapko kuch manually karne ki zaroorat nahi.
 
-**Fix (jaisa aapke pichle projects mein bhi kiya tha):** Android Studio mein koi bhi naya empty project banayein, us se `gradle/wrapper/gradle-wrapper.jar`, `gradlew`, aur `gradlew.bat` copy karke is project ke root mein paste kar dein. Ye ek dafa ka kaam hai — phir GitHub Actions workflow khud `chmod +x gradlew` karke build chala lega.
-
-Ya phir simply local machine par ye chalayein (agar Gradle already installed hai):
+Agar aap **local machine par** (Android Studio) build karna chahte hain, to Android Studio khud gradlew detect karke wrapper generate kar dega jab aap project open karenge. Ya terminal mein:
 ```
 gradle wrapper --gradle-version 8.9
 ```
