@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -65,9 +66,6 @@ fun NeonGlow(
             .background(color, RoundedCornerShape(50))
     )
 }
-
-/** Extension so `size` reads naturally above (avoids importing layout.size ambiguity issues). */
-private fun Modifier.size(size: Dp): Modifier = this.then(androidx.compose.foundation.layout.size(size))
 
 /**
  * Pulsing "LIVE" glow dot used on live tournament/match indicators.

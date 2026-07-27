@@ -2,7 +2,9 @@ package com.miesport.app.ui.screens.live
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,7 +27,7 @@ fun LiveScreen(
     val liveStatuses by viewModel.liveStatuses.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize().background(BackgroundBlack)) {
-        Column(modifier = Modifier.fillMaxSize().verticalScroll(androidx.compose.foundation.rememberScrollState())) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             Text(
                 "Live",
                 style = MaterialTheme.typography.headlineLarge,
