@@ -139,4 +139,28 @@ class FirestoreRepository(
         db.collection("notifications").document(uid).collection("items")
             .document(notifId).update("read", true).await()
     }
+
+    // ---------- Chat ----------
+    fun observeChatMessages(chatId: String): Flow<List<ChatMessage>> = callbackFlow {
+        val reg = db.collection("chats").document(chatId).collection("messages")
+            .orderBy("createdAt", Query.Direction.ASCENDING)
+            .limitToLast(200)
+            .addSnapshotListener { snap, _ -> trySend(snap?.toObjects(ChatMessage::class.java) ?: emptyList()) }
+        awaitClose { reg.remove() }
+    }
+
+    suspend fun sendChatMessage(chatId: String, message: ChatMessage) {
+        val ref = db.collection("chats").document(chatId).collection("messages").document()
+        db.collection("chats").document(chatId).collection("messages")
+            .document(ref.id).set(message.copy(id = ref.id)).await()
+    }
+
+    // ---------- Payment methods (admin-managed QR codes / account details) ----------
+    fun observePaymentMethods(): Flow<List<PaymentMethod>> = callbackFlow {
+        val reg = db.collection("payment_methods")
+            .whereEqualTo("isActive", true)
+            .orderBy("sortOrder")
+            .addSnapshotListener { snap, _ -> trySend(snap?.toObjects(PaymentMethod::class.java) ?: emptyList()) }
+        awaitClose { reg.remove() }
+    }
 }

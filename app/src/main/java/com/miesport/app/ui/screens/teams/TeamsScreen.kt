@@ -19,7 +19,8 @@ import com.miesport.app.ui.theme.*
 
 @Composable
 fun TeamsScreen(
-    viewModel: TeamsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: TeamsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    onOpenTeamChat: (String) -> Unit = {}
 ) {
     val team by viewModel.myTeam.collectAsState()
     var teamNameInput by remember { mutableStateOf("") }
@@ -106,6 +107,15 @@ fun TeamsScreen(
                                 Text("${t.members.size}", color = TextPrimary, fontWeight = FontWeight.Bold)
                                 Text("Members", color = TextMuted, style = MaterialTheme.typography.labelSmall)
                             } }
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        Button(
+                            onClick = { onOpenTeamChat(t.id) },
+                            modifier = Modifier.fillMaxWidth().height(48.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
+                        ) {
+                            Text("Open Team Chat", color = BackgroundBlack, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

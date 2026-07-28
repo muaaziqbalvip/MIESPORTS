@@ -8,6 +8,7 @@
     <style name="Theme.MiEsport.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/background_black</item>
         <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimationDuration">400</item>
         <item name="postSplashScreenTheme">@style/Theme.MiEsport</item>
     </style>
 </resources>

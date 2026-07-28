@@ -14,6 +14,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.miesport.app.ui.components.MiBottomNavBar
+import com.miesport.app.ui.screens.chat.ChatScreen
 import com.miesport.app.ui.screens.home.HomeScreen
 import com.miesport.app.ui.screens.leaderboard.LeaderboardScreen
 import com.miesport.app.ui.screens.live.LiveScreen
@@ -22,6 +23,8 @@ import com.miesport.app.ui.screens.notifications.NotificationsScreen
 import com.miesport.app.ui.screens.profile.ProfileScreen
 import com.miesport.app.ui.screens.registration.RegistrationScreen
 import com.miesport.app.ui.screens.rewards.RewardsScreen
+import com.miesport.app.ui.screens.splash.SplashScreen
+import com.miesport.app.ui.screens.support.SupportScreen
 import com.miesport.app.ui.screens.teams.TeamsScreen
 import com.miesport.app.ui.screens.tournament.TournamentDetailScreen
 import com.miesport.app.ui.screens.tournament.TournamentListScreen
@@ -43,9 +46,6 @@ fun MiEsportNavHost(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
-    val startDestination = if (FirebaseAuth.getInstance().currentUser != null)
-        NavRoutes.Home.route else NavRoutes.Login.route
-
     Scaffold(
         bottomBar = {
             if (currentRoute in bottomNavRoutes) {
@@ -62,9 +62,21 @@ fun MiEsportNavHost(
         Box(modifier = Modifier.fillMaxSize()) {
             NavHost(
                 navController = navController,
-                startDestination = startDestination,
+                startDestination = NavRoutes.Splash.route,
                 modifier = Modifier.fillMaxSize()
             ) {
+                composable(NavRoutes.Splash.route) {
+                    SplashScreen(
+                        onFinished = {
+                            val destination = if (FirebaseAuth.getInstance().currentUser != null)
+                                NavRoutes.Home.route else NavRoutes.Login.route
+                            navController.navigate(destination) {
+                                popUpTo(NavRoutes.Splash.route) { inclusive = true }
+                            }
+                        }
+                    )
+                }
+
                 composable(NavRoutes.Login.route) {
                     val loginViewModel: com.miesport.app.ui.screens.login.LoginViewModel =
                         androidx.lifecycle.viewmodel.compose.viewModel()
@@ -130,7 +142,34 @@ fun MiEsportNavHost(
                 composable(NavRoutes.Wallet.route) { WalletScreen() }
                 composable(NavRoutes.Live.route) { LiveScreen() }
                 composable(NavRoutes.Leaderboard.route) { LeaderboardScreen() }
-                composable(NavRoutes.Teams.route) { TeamsScreen() }
+                composable(NavRoutes.Teams.route) {
+                    TeamsScreen(
+                        onOpenTeamChat = { teamId ->
+                            navController.navigate(NavRoutes.TeamChat.build(teamId))
+                        }
+                    )
+                }
+                composable(NavRoutes.TeamChat.route) { backStack ->
+                    val teamId = backStack.arguments?.getString("teamId") ?: ""
+                    ChatScreen(
+                        chatId = "team_$teamId",
+                        title = "Team Chat",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
+                composable(NavRoutes.Support.route) {
+                    SupportScreen(
+                        onOpenSupportChat = { navController.navigate(NavRoutes.SupportChat.route) }
+                    )
+                }
+                composable(NavRoutes.SupportChat.route) {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
+                    ChatScreen(
+                        chatId = "support_$uid",
+                        title = "Support Chat",
+                        onBack = { navController.popBackStack() }
+                    )
+                }
                 composable(NavRoutes.Rewards.route) { RewardsScreen() }
                 composable(NavRoutes.Notifications.route) { NotificationsScreen() }
                 composable(NavRoutes.Profile.route) {
@@ -139,7 +178,15 @@ fun MiEsportNavHost(
                             navController.navigate(NavRoutes.Login.route) {
                                 popUpTo(0) { inclusive = true }
                             }
-                        }
+                        },
+                        onOpenSupport = { navController.navigate(NavRoutes.Support.route) },
+                        onEditProfile = { navController.navigate(NavRoutes.EditProfile.route) }
+                    )
+                }
+                composable(NavRoutes.EditProfile.route) {
+                    com.miesport.app.ui.screens.profile.EditProfileScreen(
+                        onBack = { navController.popBackStack() },
+                        onSaved = { navController.popBackStack() }
                     )
                 }
             }

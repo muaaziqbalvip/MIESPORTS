@@ -129,3 +129,29 @@ data class Presence(
     val online: Boolean = false,
     val lastSeen: Long = System.currentTimeMillis()
 )
+
+/** Firestore: chats/{chatId}/messages/{messageId}
+ * chatId formats: "team_{teamId}" for team chat, "support_{uid}" for player-support chat
+ */
+data class ChatMessage(
+    val id: String = "",
+    val senderId: String = "",
+    val senderName: String = "",
+    val senderAvatarUrl: String = "",
+    val text: String = "",
+    val imageUrl: String = "",
+    val isAdmin: Boolean = false,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+/** Firestore: payment_methods/{methodId} — admin-managed QR codes / account details */
+data class PaymentMethod(
+    val id: String = "",
+    val name: String = "", // e.g. "JazzCash", "EasyPaisa", "Bank Transfer"
+    val accountTitle: String = "",
+    val accountNumber: String = "",
+    val qrCodeUrl: String = "",
+    val instructions: String = "",
+    val isActive: Boolean = true,
+    val sortOrder: Int = 0
+)

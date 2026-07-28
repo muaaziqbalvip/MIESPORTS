@@ -1,10 +1,13 @@
 package com.miesport.app.ui.screens.registration
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.miesport.app.data.firebase.FirestoreRepository
 import com.miesport.app.data.model.Registration
+import com.miesport.app.data.remote.ImgBbRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +23,7 @@ sealed class RegistrationUiState {
 class RegistrationViewModel(
     private val tournamentId: String,
     private val repo: FirestoreRepository = FirestoreRepository(),
+    private val imgBbRepo: ImgBbRepository = ImgBbRepository(),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) : ViewModel() {
 
@@ -29,6 +33,18 @@ class RegistrationViewModel(
     private var screenshotUrl: String = ""
 
     fun setScreenshotUrl(url: String) { screenshotUrl = url }
+
+    fun uploadScreenshot(context: Context, uri: Uri, onDone: () -> Unit) {
+        viewModelScope.launch {
+            val result = imgBbRepo.uploadImage(context, uri)
+            result.onSuccess { url ->
+                screenshotUrl = url
+            }.onFailure { e ->
+                _uiState.value = RegistrationUiState.Error(e.message ?: "Screenshot upload nahi ho saka")
+            }
+            onDone()
+        }
+    }
 
     fun register(inGameName: String, uidGame: String, region: String, teamName: String) {
         if (inGameName.isBlank() || uidGame.isBlank() || region.isBlank()) {

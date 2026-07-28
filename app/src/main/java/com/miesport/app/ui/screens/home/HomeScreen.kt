@@ -18,6 +18,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import com.miesport.app.data.model.Tournament
 import com.miesport.app.ui.components.GlassCard
 import com.miesport.app.ui.components.NeonGlow
@@ -123,14 +127,32 @@ private fun HeroBanner(tournament: Tournament, onClick: () -> Unit) {
                 Brush.linearGradient(listOf(GradientGreenStart, GradientDarkEnd))
             )
             .clickable(onClick = onClick)
-            .padding(20.dp)
     ) {
-        Column(modifier = Modifier.align(Alignment.BottomStart)) {
-            Text("UPCOMING TOURNAMENT", color = BackgroundBlack, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
-            Text(tournament.title, color = BackgroundBlack, style = MaterialTheme.typography.headlineMedium)
+        if (tournament.bannerUrl.isNotBlank()) {
+            AsyncImage(
+                model = tournament.bannerUrl,
+                contentDescription = tournament.title,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            // Dark gradient overlay so white/black text stays readable over any photo
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(androidx.compose.ui.graphics.Color.Transparent, BackgroundBlack.copy(alpha = 0.85f))
+                        )
+                    )
+            )
+        }
+        Column(modifier = Modifier.align(Alignment.BottomStart).padding(20.dp)) {
+            val textColor = if (tournament.bannerUrl.isNotBlank()) TextPrimary else BackgroundBlack
+            Text("UPCOMING TOURNAMENT", color = textColor, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+            Text(tournament.title, color = textColor, style = MaterialTheme.typography.headlineMedium)
             Text(
                 "Prize Pool: Rs. ${tournament.prizePool.toInt()}",
-                color = BackgroundBlack,
+                color = if (tournament.bannerUrl.isNotBlank()) NeonGreen else BackgroundBlack,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
@@ -145,7 +167,19 @@ private fun TournamentCard(tournament: Tournament, onClick: () -> Unit) {
             .width(220.dp)
             .clickable(onClick = onClick)
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column {
+            if (tournament.bannerUrl.isNotBlank()) {
+                AsyncImage(
+                    model = tournament.bannerUrl,
+                    contentDescription = tournament.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+                )
+            }
+            Column(modifier = Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (tournament.status == "LIVE") {
                     PulsingDot()
@@ -179,6 +213,7 @@ private fun TournamentCard(tournament: Tournament, onClick: () -> Unit) {
                     color = TextSecondary,
                     style = MaterialTheme.typography.labelLarge
                 )
+            }
             }
         }
     }

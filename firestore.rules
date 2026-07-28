@@ -94,5 +94,31 @@ service cloud.firestore {
       allow read: if false; // consumed only by Cloud Functions
       allow create: if isAdmin();
     }
+
+    // ---------- Chat (team chat + player support chat) ----------
+    match /chats/{chatId}/messages/{messageId} {
+      // team_{teamId} chats: any signed-in, non-banned user can read/write (app enforces team membership in UI)
+      // support_{uid} chats: only that player + admins can read/write
+      allow read: if isSignedIn() && (
+        chatId.matches('team_.*') ||
+        (chatId.matches('support_.*') && (chatId == 'support_' + request.auth.uid || isAdmin()))
+      );
+      allow create: if isSignedIn() && isNotBanned() && (
+        chatId.matches('team_.*') ||
+        (chatId.matches('support_.*') && (chatId == 'support_' + request.auth.uid || isAdmin()))
+      );
+    }
+
+    // Lightweight index so the admin panel can discover active support chats
+    match /support_chat_index/{chatId} {
+      allow read: if isAdmin();
+      allow write: if isSignedIn() && (chatId == 'support_' + request.auth.uid || isAdmin());
+    }
+
+    // ---------- Payment methods (admin-managed QR codes) ----------
+    match /payment_methods/{methodId} {
+      allow read: if true; // players need to see active payment methods without logging in issues
+      allow write: if isAdmin();
+    }
   }
 }

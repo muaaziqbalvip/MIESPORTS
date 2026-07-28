@@ -7,7 +7,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
@@ -27,7 +29,9 @@ import com.miesport.app.ui.theme.*
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
-    onSignedOut: () -> Unit
+    onSignedOut: () -> Unit,
+    onOpenSupport: () -> Unit = {},
+    onEditProfile: () -> Unit = {}
 ) {
     val user by viewModel.user.collectAsState()
 
@@ -57,6 +61,19 @@ fun ProfileScreen(
             Spacer(Modifier.height(12.dp))
             Text(user?.gamingName ?: "Player", style = MaterialTheme.typography.headlineMedium, color = TextPrimary)
             Text("Rank: ${user?.rank ?: "Unranked"}", style = MaterialTheme.typography.bodyMedium, color = NeonGreen)
+
+            Spacer(Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onEditProfile,
+                shape = RoundedCornerShape(20.dp),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceGlassBorder)
+            ) {
+                Icon(Icons.Filled.Edit, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(16.dp))
+                Spacer(Modifier.width(6.dp))
+                Text("Edit Profile", color = TextPrimary, style = MaterialTheme.typography.labelLarge)
+            }
 
             Spacer(Modifier.height(24.dp))
 
@@ -92,6 +109,19 @@ fun ProfileScreen(
             }
 
             Spacer(Modifier.height(32.dp))
+
+            OutlinedButton(
+                onClick = onOpenSupport,
+                modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceGlassBorder)
+            ) {
+                Icon(Icons.Filled.HelpOutline, contentDescription = null, tint = TextSecondary)
+                Spacer(Modifier.width(8.dp))
+                Text("Help & Support", color = TextPrimary)
+            }
+
+            Spacer(Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = {

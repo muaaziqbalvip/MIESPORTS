@@ -114,6 +114,9 @@ dependencies {
     // DataStore for local prefs
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 
+    // OkHttp for ImgBB image upload (banners, QR codes, chat images, payment screenshots)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
     // Splash screen API
     implementation("androidx.core:core-splashscreen:1.0.1")
 

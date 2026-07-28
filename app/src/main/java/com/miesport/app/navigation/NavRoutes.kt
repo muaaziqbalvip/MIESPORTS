@@ -23,7 +23,13 @@ sealed class NavRoutes(val route: String) {
     object Live : NavRoutes("live")
     object Rewards : NavRoutes("rewards")
     object Profile : NavRoutes("profile")
+    object EditProfile : NavRoutes("edit_profile")
     object Notifications : NavRoutes("notifications")
+    object Support : NavRoutes("support")
+    object TeamChat : NavRoutes("team_chat/{teamId}") {
+        fun build(id: String) = "team_chat/$id"
+    }
+    object SupportChat : NavRoutes("support_chat")
 
     // Admin
     object AdminDashboard : NavRoutes("admin_dashboard")
