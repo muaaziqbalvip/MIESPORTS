@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 sealed class EditProfileUiState {
     object Idle : EditProfileUiState()
@@ -61,13 +62,14 @@ class EditProfileViewModel(
         viewModelScope.launch {
             _uiState.value = EditProfileUiState.Loading
             runCatching {
-                val updates = mutableMapOf<String, Any>(
+                val updates: MutableMap<String, Any> = mutableMapOf(
                     "gamingName" to gamingName.trim(),
                     "uidGame" to uidGame.trim(),
                     "region" to region.trim()
                 )
                 pendingAvatarUrl?.let { updates["avatarUrl"] = it }
-                db.collection("users").document(uid).update(updates).await()
+                val updateMap: Map<String, Any> = updates
+                db.collection("users").document(uid).update(updateMap).await()
             }.onSuccess {
                 _uiState.value = EditProfileUiState.Success
             }.onFailure { e ->
@@ -76,6 +78,3 @@ class EditProfileViewModel(
         }
     }
 }
-
-private suspend fun com.google.android.gms.tasks.Task<Void>.await() =
-    kotlinx.coroutines.tasks.await(this)
