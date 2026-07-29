@@ -36,12 +36,32 @@ class TournamentDetailViewModel(
     private val _tournament = MutableStateFlow<Tournament?>(null)
     val tournament: StateFlow<Tournament?> = _tournament.asStateFlow()
 
-    val roomReveal: StateFlow<Map<String, String>?> = rtdb.observeRoomReveal(tournamentId)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    private val _loadError = MutableStateFlow<String?>(null)
+    val loadError: StateFlow<String?> = _loadError.asStateFlow()
+
+    val roomReveal: StateFlow<Map<String, String>?> =
+        if (tournamentId.isBlank()) {
+            MutableStateFlow(null)
+        } else {
+            rtdb.observeRoomReveal(tournamentId)
+                .catch { emit(null) } // never let an RTDB error crash the screen
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+        }
 
     init {
-        viewModelScope.launch {
-            _tournament.value = repo.getTournament(tournamentId)
+        if (tournamentId.isBlank()) {
+            _loadError.value = "Tournament ID missing hai"
+        } else {
+            viewModelScope.launch {
+                runCatching {
+                    repo.getTournament(tournamentId)
+                }.onSuccess { result ->
+                    _tournament.value = result
+                    if (result == null) _loadError.value = "Ye tournament nahi mila"
+                }.onFailure { e ->
+                    _loadError.value = e.message ?: "Tournament load nahi ho saka"
+                }
+            }
         }
     }
 }
