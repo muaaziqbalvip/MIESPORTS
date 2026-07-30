@@ -46,9 +46,14 @@ fun RegistrationScreen(
     var teamName by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isUploadingImage by remember { mutableStateOf(false) }
+    var showConfirmDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
+    val tournament by viewModel.tournament.collectAsState()
+    val walletBalance by viewModel.walletBalance.collectAsState()
+    val entryFee = tournament?.entryFee ?: 0.0
+    val isPaid = entryFee > 0
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
@@ -78,6 +83,41 @@ fun RegistrationScreen(
 
             GlassCard(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
                 Column(modifier = Modifier.padding(20.dp)) {
+                    if (isPaid) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column {
+                                Text("Entry Fee", color = TextSecondary, style = MaterialTheme.typography.labelLarge)
+                                Text("Rs. ${entryFee.toInt()}", color = GoldPrimary, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("Wallet Balance", color = TextSecondary, style = MaterialTheme.typography.labelLarge)
+                                Text(
+                                    "Rs. ${walletBalance.toInt()}",
+                                    color = if (walletBalance >= entryFee) NeonGreen else DangerRed,
+                                    style = MaterialTheme.typography.titleLarge,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                        if (walletBalance < entryFee) {
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                "Balance kam hai. Wallet mein deposit karke wapas aayein.",
+                                color = DangerRed,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+                        Spacer(Modifier.height(16.dp))
+                        HorizontalDivider(color = SurfaceGlassBorder)
+                        Spacer(Modifier.height(16.dp))
+                    } else {
+                        Text("FREE Tournament", color = NeonGreen, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(16.dp))
+                    }
+
                     OutlinedTextField(
                         value = inGameName,
                         onValueChange = { inGameName = it },
@@ -171,8 +211,13 @@ fun RegistrationScreen(
                     Spacer(Modifier.height(20.dp))
 
                     Button(
-                        onClick = { viewModel.register(inGameName, uidGame, region, teamName) },
-                        enabled = state !is RegistrationUiState.Loading && !isUploadingImage,
+                        onClick = {
+                            if (isPaid) showConfirmDialog = true
+                            else viewModel.register(inGameName, uidGame, region, teamName)
+                        },
+                        enabled = state !is RegistrationUiState.Loading && !isUploadingImage &&
+                            inGameName.isNotBlank() && uidGame.isNotBlank() && region.isNotBlank() &&
+                            (!isPaid || walletBalance >= entryFee),
                         modifier = Modifier.fillMaxWidth().height(54.dp),
                         shape = RoundedCornerShape(16.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = NeonGreen)
@@ -180,12 +225,39 @@ fun RegistrationScreen(
                         if (state is RegistrationUiState.Loading) {
                             CircularProgressIndicator(color = BackgroundBlack, modifier = Modifier.size(22.dp), strokeWidth = 2.dp)
                         } else {
-                            Text("Confirm Registration", color = BackgroundBlack, fontWeight = FontWeight.Bold)
+                            Text(
+                                if (isPaid) "Pay Rs.${entryFee.toInt()} & Register" else "Confirm Registration",
+                                color = BackgroundBlack,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
             }
             Spacer(Modifier.height(60.dp))
+        }
+
+        if (showConfirmDialog) {
+            AlertDialog(
+                onDismissRequest = { showConfirmDialog = false },
+                containerColor = SurfaceDark,
+                title = { Text("Confirm Payment", color = TextPrimary) },
+                text = {
+                    Text(
+                        "Rs. ${entryFee.toInt()} aapke wallet se kat jayenge aur aap is tournament mein register ho jayenge. Continue karein?",
+                        color = TextSecondary
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showConfirmDialog = false
+                        viewModel.register(inGameName, uidGame, region, teamName)
+                    }) { Text("Confirm & Pay", color = NeonGreen, fontWeight = FontWeight.Bold) }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showConfirmDialog = false }) { Text("Cancel", color = TextMuted) }
+                }
+            )
         }
     }
 }

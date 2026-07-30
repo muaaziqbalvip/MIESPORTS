@@ -32,10 +32,17 @@ class WalletViewModel(
         }
     }
 
-    fun requestWithdraw(amount: Double, method: String) {
+    fun requestWithdraw(amount: Double, method: String, accountTitle: String, accountNumber: String) {
         viewModelScope.launch {
             repo.requestTransaction(
-                WalletTransaction(userId = uid, type = "WITHDRAW", amount = amount, method = method, status = "PENDING")
+                WalletTransaction(
+                    userId = uid,
+                    type = "WITHDRAW",
+                    amount = amount,
+                    method = method,
+                    status = "PENDING",
+                    note = "Account: $accountTitle ($accountNumber)"
+                )
             )
         }
     }

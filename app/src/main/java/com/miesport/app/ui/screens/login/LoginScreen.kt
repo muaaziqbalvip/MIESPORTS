@@ -1,5 +1,6 @@
 package com.miesport.app.ui.screens.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,12 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.miesport.app.R
 import com.miesport.app.ui.components.GlassCard
 import com.miesport.app.ui.components.NeonGlow
 import com.miesport.app.ui.theme.*
@@ -74,7 +78,16 @@ fun LoginScreen(
                 .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(64.dp))
+            Spacer(Modifier.height(48.dp))
+
+            Image(
+                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                contentDescription = "MI ESPORT",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(96.dp)
+            )
+
+            Spacer(Modifier.height(12.dp))
 
             Text(
                 "MI ESPORT",
@@ -227,6 +240,12 @@ fun LoginScreen(
                         shape = RoundedCornerShape(14.dp),
                         border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceGlassBorder)
                     ) {
+                        Image(
+                            painter = painterResource(id = com.miesport.app.R.drawable.ic_google),
+                            contentDescription = "Google",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(10.dp))
                         Text("Continue with Google", color = TextPrimary, fontWeight = FontWeight.SemiBold)
                     }
                 }
@@ -241,6 +260,27 @@ fun LoginScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+
+            Spacer(Modifier.height(20.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Made with ",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextMuted
+                )
+                Text(
+                    "Claude",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = NeonGreen,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    " by Anthropic",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TextMuted
+                )
+            }
 
             Spacer(Modifier.height(32.dp))
         }

@@ -25,10 +25,16 @@ service cloud.firestore {
       allow read: if isSignedIn();
       allow create: if isOwner(uid);
       // Users can update their own profile but NOT walletBalance, isBanned, or wins/earnings
-      // (those are admin/server-only fields, changed via transactions/Cloud Functions).
+      // (those are admin/server-only fields, changed via transactions/Cloud Functions) —
+      // EXCEPT walletBalance may only be decreased by the owner (tournament entry-fee payment),
+      // never increased, which keeps deposits/prizes/bonuses admin-only.
       allow update: if isOwner(uid) &&
         !request.resource.data.diff(resource.data).affectedKeys()
-          .hasAny(['walletBalance', 'isBanned', 'wins', 'totalEarnings', 'matchesPlayed']);
+          .hasAny(['isBanned', 'wins', 'totalEarnings', 'matchesPlayed']) &&
+        (
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['walletBalance']) ||
+          request.resource.data.walletBalance <= resource.data.walletBalance
+        );
       allow update: if isAdmin();
       allow delete: if isAdmin();
     }
@@ -42,7 +48,13 @@ service cloud.firestore {
     // ---------- Tournaments ----------
     match /tournaments/{tournamentId} {
       allow read: if true; // public listing
-      allow create, update, delete: if isAdmin();
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin();
+      // Registration flow increments filledSlots by exactly 1 as part of the
+      // registerForTournament transaction — every other field must stay untouched.
+      allow update: if isSignedIn() && isNotBanned() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['filledSlots']) &&
+        request.resource.data.filledSlots == resource.data.filledSlots + 1;
 
       match /registrations/{regId} {
         allow read: if isAdmin() || isOwner(resource.data.userId);
@@ -60,8 +72,10 @@ service cloud.firestore {
     match /wallet_transactions/{txId} {
       allow read: if isAdmin() || isOwner(resource.data.userId);
       allow create: if isSignedIn() && isNotBanned() &&
-        request.resource.data.userId == request.auth.uid &&
-        request.resource.data.status == 'PENDING';
+        request.resource.data.userId == request.auth.uid && (
+          request.resource.data.status == 'PENDING' ||
+          (request.resource.data.type == 'ENTRY_FEE' && request.resource.data.status == 'APPROVED')
+        );
       allow update: if isAdmin(); // only admin can approve/reject
       allow delete: if isAdmin();
     }
@@ -95,17 +109,20 @@ service cloud.firestore {
       allow create: if isAdmin();
     }
 
-    // ---------- Chat (team chat + player support chat) ----------
+    // ---------- Chat (team chat + player support chat + player-to-player DM) ----------
     match /chats/{chatId}/messages/{messageId} {
-      // team_{teamId} chats: any signed-in, non-banned user can read/write (app enforces team membership in UI)
-      // support_{uid} chats: only that player + admins can read/write
+      // team_{teamId}: any signed-in, non-banned user (app enforces team membership in UI)
+      // support_{uid}: only that player + admins
+      // dm_{uidA}_{uidB} (sorted): only the two participants
       allow read: if isSignedIn() && (
         chatId.matches('team_.*') ||
-        (chatId.matches('support_.*') && (chatId == 'support_' + request.auth.uid || isAdmin()))
+        (chatId.matches('support_.*') && (chatId == 'support_' + request.auth.uid || isAdmin())) ||
+        (chatId.matches('dm_.*') && chatId.matches('.*' + request.auth.uid + '.*'))
       );
       allow create: if isSignedIn() && isNotBanned() && (
         chatId.matches('team_.*') ||
-        (chatId.matches('support_.*') && (chatId == 'support_' + request.auth.uid || isAdmin()))
+        (chatId.matches('support_.*') && (chatId == 'support_' + request.auth.uid || isAdmin())) ||
+        (chatId.matches('dm_.*') && chatId.matches('.*' + request.auth.uid + '.*'))
       );
     }
 

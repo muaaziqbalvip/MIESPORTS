@@ -99,8 +99,9 @@ fun WalletScreen(
             TransactionDialog(
                 title = "Deposit Funds",
                 confirmLabel = "Request Deposit",
+                isWithdraw = false,
                 onDismiss = { showDepositDialog = false },
-                onConfirm = { amount, method ->
+                onConfirm = { amount, method, _, _ ->
                     viewModel.requestDeposit(amount, method)
                     showDepositDialog = false
                 }
@@ -110,9 +111,10 @@ fun WalletScreen(
             TransactionDialog(
                 title = "Withdraw Funds",
                 confirmLabel = "Request Withdraw",
+                isWithdraw = true,
                 onDismiss = { showWithdrawDialog = false },
-                onConfirm = { amount, method ->
-                    viewModel.requestWithdraw(amount, method)
+                onConfirm = { amount, method, accountTitle, accountNumber ->
+                    viewModel.requestWithdraw(amount, method, accountTitle, accountNumber)
                     showWithdrawDialog = false
                 }
             )
@@ -161,11 +163,14 @@ private fun TransactionRow(tx: WalletTransaction) {
 private fun TransactionDialog(
     title: String,
     confirmLabel: String,
+    isWithdraw: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: (Double, String) -> Unit
+    onConfirm: (Double, String, String, String) -> Unit
 ) {
     var amount by remember { mutableStateOf("") }
     var method by remember { mutableStateOf("JazzCash") }
+    var accountTitle by remember { mutableStateOf("") }
+    var accountNumber by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -197,12 +202,35 @@ private fun TransactionDialog(
                         )
                     }
                 }
+
+                if (isWithdraw) {
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = accountTitle,
+                        onValueChange = { accountTitle = it },
+                        label = { Text("Account Title") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = com.miesport.app.ui.screens.login.miTextFieldColors()
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = accountNumber,
+                        onValueChange = { accountNumber = it },
+                        label = { Text("$method Account Number") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = com.miesport.app.ui.screens.login.miTextFieldColors()
+                    )
+                }
             }
         },
         confirmButton = {
             TextButton(onClick = {
                 val amt = amount.toDoubleOrNull() ?: 0.0
-                if (amt > 0) onConfirm(amt, method)
+                if (amt <= 0) return@TextButton
+                if (isWithdraw && (accountTitle.isBlank() || accountNumber.isBlank())) return@TextButton
+                onConfirm(amt, method, accountTitle, accountNumber)
             }) { Text(confirmLabel, color = NeonGreen) }
         },
         dismissButton = {

@@ -8,10 +8,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import com.miesport.app.ui.components.MiBottomNavBar
 import com.miesport.app.ui.screens.chat.ChatScreen
@@ -20,6 +22,7 @@ import com.miesport.app.ui.screens.leaderboard.LeaderboardScreen
 import com.miesport.app.ui.screens.live.LiveScreen
 import com.miesport.app.ui.screens.login.LoginScreen
 import com.miesport.app.ui.screens.notifications.NotificationsScreen
+import com.miesport.app.ui.screens.playersearch.PlayerSearchScreen
 import com.miesport.app.ui.screens.profile.ProfileScreen
 import com.miesport.app.ui.screens.registration.RegistrationScreen
 import com.miesport.app.ui.screens.rewards.RewardsScreen
@@ -121,7 +124,10 @@ fun MiEsportNavHost(
                     )
                 }
 
-                composable(NavRoutes.TournamentDetail.route) { backStack ->
+                composable(
+                    NavRoutes.TournamentDetail.route,
+                    arguments = listOf(navArgument("tournamentId") { type = NavType.StringType })
+                ) { backStack ->
                     val id = backStack.arguments?.getString("tournamentId") ?: ""
                     TournamentDetailScreen(
                         tournamentId = id,
@@ -130,7 +136,10 @@ fun MiEsportNavHost(
                     )
                 }
 
-                composable(NavRoutes.Registration.route) { backStack ->
+                composable(
+                    NavRoutes.Registration.route,
+                    arguments = listOf(navArgument("tournamentId") { type = NavType.StringType })
+                ) { backStack ->
                     val id = backStack.arguments?.getString("tournamentId") ?: ""
                     RegistrationScreen(
                         tournamentId = id,
@@ -149,7 +158,10 @@ fun MiEsportNavHost(
                         }
                     )
                 }
-                composable(NavRoutes.TeamChat.route) { backStack ->
+                composable(
+                    NavRoutes.TeamChat.route,
+                    arguments = listOf(navArgument("teamId") { type = NavType.StringType })
+                ) { backStack ->
                     val teamId = backStack.arguments?.getString("teamId") ?: ""
                     ChatScreen(
                         chatId = "team_$teamId",
@@ -170,6 +182,35 @@ fun MiEsportNavHost(
                         onBack = { navController.popBackStack() }
                     )
                 }
+                composable(NavRoutes.PlayerSearch.route) {
+                    PlayerSearchScreen(
+                        onBack = { navController.popBackStack() },
+                        onOpenChat = { targetUid, targetName ->
+                            navController.navigate(NavRoutes.PlayerChat.build(targetUid, targetName))
+                        }
+                    )
+                }
+                composable(
+                    NavRoutes.PlayerChat.route,
+                    arguments = listOf(
+                        navArgument("targetUid") { type = NavType.StringType },
+                        navArgument("targetName") { type = NavType.StringType }
+                    )
+                ) { backStack ->
+                    val targetUid = backStack.arguments?.getString("targetUid") ?: ""
+                    val targetNameRaw = backStack.arguments?.getString("targetName") ?: "Player"
+                    val targetName = runCatching {
+                        java.net.URLDecoder.decode(targetNameRaw, "UTF-8")
+                    }.getOrDefault(targetNameRaw)
+                    val myUid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    // Deterministic chat id so both users land in the same conversation
+                    val chatId = "dm_" + listOf(myUid, targetUid).sorted().joinToString("_")
+                    ChatScreen(
+                        chatId = chatId,
+                        title = targetName,
+                        onBack = { navController.popBackStack() }
+                    )
+                }
                 composable(NavRoutes.Rewards.route) { RewardsScreen() }
                 composable(NavRoutes.Notifications.route) { NotificationsScreen() }
                 composable(NavRoutes.Profile.route) {
@@ -180,7 +221,8 @@ fun MiEsportNavHost(
                             }
                         },
                         onOpenSupport = { navController.navigate(NavRoutes.Support.route) },
-                        onEditProfile = { navController.navigate(NavRoutes.EditProfile.route) }
+                        onEditProfile = { navController.navigate(NavRoutes.EditProfile.route) },
+                        onFindPlayers = { navController.navigate(NavRoutes.PlayerSearch.route) }
                     )
                 }
                 composable(NavRoutes.EditProfile.route) {

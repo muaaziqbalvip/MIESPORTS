@@ -30,6 +30,11 @@ sealed class NavRoutes(val route: String) {
         fun build(id: String) = "team_chat/$id"
     }
     object SupportChat : NavRoutes("support_chat")
+    object PlayerSearch : NavRoutes("player_search")
+    object PlayerChat : NavRoutes("player_chat/{targetUid}/{targetName}") {
+        fun build(targetUid: String, targetName: String) =
+            "player_chat/$targetUid/${java.net.URLEncoder.encode(targetName, "UTF-8")}"
+    }
 
     // Admin
     object AdminDashboard : NavRoutes("admin_dashboard")

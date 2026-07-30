@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.HelpOutline
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,7 +32,8 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onSignedOut: () -> Unit,
     onOpenSupport: () -> Unit = {},
-    onEditProfile: () -> Unit = {}
+    onEditProfile: () -> Unit = {},
+    onFindPlayers: () -> Unit = {}
 ) {
     val user by viewModel.user.collectAsState()
 
@@ -109,6 +111,19 @@ fun ProfileScreen(
             }
 
             Spacer(Modifier.height(32.dp))
+
+            OutlinedButton(
+                onClick = onFindPlayers,
+                modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth().height(52.dp),
+                shape = RoundedCornerShape(14.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, SurfaceGlassBorder)
+            ) {
+                Icon(Icons.Filled.Search, contentDescription = null, tint = TextSecondary)
+                Spacer(Modifier.width(8.dp))
+                Text("Find Players (Chat)", color = TextPrimary)
+            }
+
+            Spacer(Modifier.height(12.dp))
 
             OutlinedButton(
                 onClick = onOpenSupport,
